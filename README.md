@@ -7,20 +7,20 @@ Given that the information is in my mailbox and there shouldn't be any privacy c
 ![](https://1.bp.blogspot.com/-j_fyvriDXUQ/XIHgQL1X3cI/AAAAAAAACS0/nJKkqlPsjdIJpNohzk6p9Mi_DmmZwU3LACLcBGAs/s1600/tcHist1.JPG)
 
 
-That constructs a query that look like the following to Outlook REST endpoint
+That constructs a query that looks like the following to Outlook REST endpoint
 
-    https://outlook.office.com/api/v2.0/me/MailFolders/AllItems/messages?$Top=100&amp;$Select=ReceivedDateTime,bodyPreview,weblink&amp;$filter=SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x001a' and ep/Value eq 'IPM.SkypeTeams.Message') and from/emailAddress/address eq 'e5tmp5@domain.com' 
+    https://outlook.office.com/api/v2.0/me/MailFolders/AllItems/messages?$OrderyBy=ReceivedDateTime Desc&amp;$Top=30&amp;$Select=ReceivedDateTime,bodyPreview,webLink&amp;$filter=SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x001a' and ep/Value eq 'IPM.SkypeTeams.Message') and SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x5D01' and ep/Value eq 'e5tmp5@datarumble.com')
 
-To break this down a bit first this gets the first 100 messages from the AllItems Search Folder
+To break this down a bit first this gets the first 30 messages from the AllItems Search Folder sorted by the ReceivedDateTime 
 
- https://outlook.office.com/api/v2.0/me/MailFolders/AllItems/messages?$Top=100
+ https://outlook.office.com/api/v2.0/me/MailFolders/AllItems/messages?$OrderyBy=ReceivedDateTime desc&amp;$Top=30
 Next this selects the properties we are going to use the table to display, I used body preview because for IM's that generally don't have subjects so getting the body preview text is generally good enough to shown the whole message. But if the message is longer the link is provided which will open up in a new OWA windows using the weblink property which contains a full path to open the Item. One useful things about opening the message this way is you can then click replay and continue a message from IM in email with the body context from the IM (I know this will really erk some Teams people but i think it pretty cool and has proven useful for me).
 
     $Select=ReceivedDateTime,bodyPreview,weblink
 
-Next this is the filter that is applied so it only returns the IM chat message (or those messages that have an ItemClass of IPM.SkypeTeams.Message and are from the sender assoicated with the Message you activate the Addin on.
+Next this is the filter that is applied so it only returns the Teams chat messages (or those messages that have an ItemClass of IPM.SkypeTeams.Message and are from the sender associated with the Message you activate the Addin on. I used the Extended property definition for both of these because firstly there is no equivalent property and for the From address if you used orderby and the a from filter like  and from/emailAddress/address eq 'e5tmp5@datarumble.com' there's a bug that the messages won't sort by the date so you always get the old messages first. Using the extended property fixed that issue but its a little weird.
 
- `$filter=SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x001a' and ep/Value eq 'IPM.SkypeTeams.Message') and from/emailAddress/address eq 'e5tmp5@datarumble.com'`
+     $filter=SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x001a' and ep/Value eq 'IPM.SkypeTeams.Message') and and SingleValueExtendedProperties/Any(ep: ep/PropertyId eq 'String 0x5D01' and ep/Value eq 'e5tmp5@datarumble.com')
 
 One thing I did find after using this for a while is that it didn't work when I got a notification from teams like the following
 
